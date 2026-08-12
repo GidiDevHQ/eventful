@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { catchAsync } from "@/utils/AppError";
 import * as authService from "./authService";
-import { date, success } from "zod";
 
 export const signup = catchAsync(async (req: Request, res: Response) => {
     const result = await authService.signup(req.body)
