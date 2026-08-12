@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CREATOR
+  EVENTEE
+}
+
+enum TicketStatus {
+  PENDING
+  PAID
+  USED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id String @id @default(uuid())
+
+  email String @unique
+
+  password String
+
+  name String
+  role Role
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  eventsCreated Event[] @relation("CreatorEvents")
+
+  tickets Ticket[]
+
+  remainders Reminder[]
+
+  @@index([role])
+}
+
+model Event {
+  id   String @id @default(uuid())
+  slug String @unique
+
+  title         String
+  description   String
+  venue         String
+  coverImageUrl String?
+
+  price Int
+
+  Capacity Int?
+
+  startsAt DateTime
+  endsAt   DateTime
+
+  defaultReminderOffsets Int[] @default([1440])
+
+  creatorId String
+  creator   User   @relation("CreatorEvents", fields: [creatorId], references: [id])
+
+  tickets    Ticket[]
+  remainders Reminder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([creatorId])
+  @@index([startsAt])
+}
+
+model Ticket {
+  id String @id @default(uuid())
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  status TicketStatus @default(PENDING)
+
+  qrCodeToken String? @unique
+
+  qrCodeUrl String
+
+  scannedAt DateTime
+
+  payment Payment?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([userId])
+}
+
+model Payment {
+  id       String
+  ticketId String @unique
+  ticket   Ticket @relation(fields: [ticketId], references: [id])
+
+  paystackRef String @unique
+
+  amount Int
+
+  status     PaymentStatus @default(PENDING)
+  verifiedAt DateTime
+
+  @@index([status])
+}
+
+model Reminder {
+  id String
+
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
+
+  offsetMinutes Int
+
+  bullJobId String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, eventId, offsetMinutes])
+  @@index([eventId])
+}

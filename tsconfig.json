@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",              // Node's default module system — matches Express/Prisma ecosystem
+    "lib": ["ES2020"],
+    "types": ["node"],                  // pulls in @types/node so process, Buffer etc. resolve
+
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    "sourceMap": true,
+    "declaration": false,
+
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
+    "esModuleInterop": true,            // lets you `import express from "express"` cleanly
+    "resolveJsonModule": true,
+
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"]
+    },
+
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "noUncheckedIndexedAccess": true,   // optional but good: arr[i] is typed as possibly undefined
+    "exactOptionalPropertyTypes": true  // optional but good: stricter about optional (?) fields
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
