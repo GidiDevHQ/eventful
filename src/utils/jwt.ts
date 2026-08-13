@@ -19,15 +19,19 @@ const CONFIG = {
 } as const;
 
 export function signAccessToken(payload: AccessTokenPayload): string {
-    return jwt.sign(payload, CONFIG.access.secret, {
-        expiresIn: CONFIG.access.expiresIn,
-    });
+    const options: SignOptions = {};
+    if (CONFIG.access.expiresIn !== undefined) {
+        options.expiresIn = CONFIG.access.expiresIn;
+    }
+    return jwt.sign(payload, CONFIG.access.secret, options);
 }
 
 export function signRefreshToken(payload: AccessTokenPayload): string {
-    return jwt.sign(payload, CONFIG.refresh.secret, {
-        expiresIn: CONFIG.refresh.expiresIn,
-    });
+    const options: SignOptions = {};
+    if (CONFIG.refresh.expiresIn !== undefined) {
+        options.expiresIn = CONFIG.refresh.expiresIn;
+    }
+    return jwt.sign(payload, CONFIG.refresh.secret, options);
 }
 
 export function verifyAccessToken(token: string): AccessTokenPayload {
