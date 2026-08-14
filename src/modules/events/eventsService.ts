@@ -3,7 +3,7 @@ import { AppError } from "@/utils/AppError";
 import { cached, invalidateByPrefix } from "../../utils/cache";
 import { slugify } from "@/utils/slugify";
 import { env } from "@/config/env";
-import { CreateEventInput, UpdateEventInput } from "./eventSchema";
+import { CreateEventInput, UpdateEventInput } from "./eventsSchema";
 import { promise } from "zod";
 
 const EVENT_LIST_TTL = 60;
@@ -16,12 +16,15 @@ function stripUndefined<T extends Record<string, unknown>>(value: T): Partial<T>
 }
 
 export async function createEvent(creatorId: string, input: CreateEventInput) {
+    const { capacity, ...rest } = input;
+
     const data = stripUndefined({
-        ...input,
+        ...rest,
         slug: slugify(input.title),
         startsAt: new Date(input.startsAt),
         endsAt: new Date(input.endsAt),
         coverImageUrl: input.coverImageUrl ?? null,
+        Capacity: capacity ?? null,
         defaultReminderOffsets: input.defaultReminderOffsets ?? [1440],
         creatorId,
     });
@@ -39,8 +42,11 @@ export async function updateEvent(creatorId: string, eventId: string, input: Upd
     if (!event) throw new AppError("Event not found", 404);
     if (event.creatorId !== creatorId) throw new AppError("Not your event", 403);
 
+    const { capacity, ...rest } = input;
+
     const data = stripUndefined({
-        ...input,
+        ...rest,
+        ...(capacity !== undefined ? { Capacity: capacity } : {}),
         ...(input.startsAt ? { startsAt: new Date(input.startsAt) } : {}),
         ...(input.endsAt ? { endsAt: new Date(input.endsAt) } : {}),
     });
@@ -86,6 +92,13 @@ export async function getEventBySlugOrId(idOrSlug: string) {
 
     if (!event) throw new AppError("Event not found", 404);
     return event
+}
+
+export async function listEventsByCreator(creatorId: string) {
+    return prisma.event.findMany({
+        where: { creatorId },
+        orderBy: { startsAt: "asc" },
+    });
 }
 
 export async function listApplicants(creatorId: string, eventId: string) {

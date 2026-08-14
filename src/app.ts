@@ -3,8 +3,8 @@ import cors from "cors";
 import helmet from "helmet"
 import { generateLimiter } from "./middleware/rateLimiter";
 import { notFoundHandler,globalErrorHandler } from "./middleware/errorHandler";
-import { generatePrime } from "node:crypto";
 import authRoutes from "./modules/auth/authRoutes";
+import eventsRoutes from "./modules/events/eventsRoutes"
 
 export const app = express();
 
@@ -21,6 +21,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/v1/auth", authRoutes)
+app.use("/api/v1/events", eventsRoutes)
 
 app.use(notFoundHandler);
 app.use(globalErrorHandler);

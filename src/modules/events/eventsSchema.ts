@@ -23,6 +23,12 @@ export const createEventSchema = z
         .int("Price must be a whole number")
         .nonnegative("Ticket price cannot be negative"),
 
+      capacity: z
+        .number({ error: "Event capacity is required" })
+        .int("Capacity must be a whole integer number")
+        .positive("Event capacity must be at least 1 person")
+        .optional(),
+
       startsAt: z
         .string({ error: "Event start date and time are required" })
         .datetime({ message: "Invalid start date format. Expected an ISO-8601 string" }),
@@ -55,7 +61,16 @@ export const updateEventSchema = z
   .object({
     body: rawUpdateBodySchema.partial(),
     params: z.object({
-      id: z.string({ error: "Event ID is required" }).uuid("Invalid Event ID format. Expected a standard UUIDv4"),
+      id: z
+        .string({ error: "Event ID is required" })
+        .min(1, "Event ID is required")
+        .refine(
+          (value) => {
+            const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(value);
+            return isUuid;
+          },
+          "Invalid Event ID format. Expected a standard UUIDv4"
+        ),
     }),
   })
   .refine(
@@ -71,7 +86,7 @@ export const updateEventSchema = z
 
 export const eventIdParamSchema = z.object({
   params: z.object({
-    id: z.string({ error: "Event ID is required" }).uuid("Invalid Event ID format. Expected a standard UUIDv4"),
+    id: z.string({ error: "Event ID is required" }).min(1, "Event ID is required"),
   }),
 });
 
