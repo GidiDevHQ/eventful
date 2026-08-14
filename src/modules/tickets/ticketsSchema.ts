@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const applyEventSchema = z.object({
+export const applyForEventSchema = z.object({
     body: z.object({
         eventId: z.uuid(),
     }),
@@ -15,4 +15,4 @@ export const verifyTicketSchema = z.object({
 export const ticketIdParamSchema = z.object({
     params: z.object({ id: z.uuid() }),
 });
-export type ApplyForEventInput = z.infer<typeof applyEventSchema>["body"]
+export type ApplyForEventInput = z.infer<typeof applyForEventSchema>["body"];
