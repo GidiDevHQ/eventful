@@ -6,6 +6,7 @@ import { notFoundHandler,globalErrorHandler } from "./middleware/errorHandler";
 import authRoutes from "./modules/auth/authRoutes";
 import eventsRoutes from "./modules/events/eventsRoutes"
 import ticketsRoutes from "./modules/tickets/ticketsRoutes"
+import paymentRoutes from "./modules/payments/paymentsRoutes"
 
 export const app = express();
 
@@ -24,6 +25,7 @@ app.get("/health", (_req, res) => {
 app.use("/api/v1/auth", authRoutes)
 app.use("/api/v1/events", eventsRoutes)
 app.use("/api/v1/tickets", ticketsRoutes)
+app.use("/api/v1/payments", paymentRoutes)
 
 app.use(notFoundHandler);
 app.use(globalErrorHandler);

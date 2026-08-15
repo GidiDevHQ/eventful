@@ -105,7 +105,8 @@ model Ticket {
 }
 
 model Payment {
-  id       String
+  id String @id @default(uuid())
+
   ticketId String @unique
   ticket   Ticket @relation(fields: [ticketId], references: [id])
 
@@ -114,7 +115,10 @@ model Payment {
   amount Int
 
   status     PaymentStatus @default(PENDING)
-  verifiedAt DateTime
+  verifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([status])
 }
