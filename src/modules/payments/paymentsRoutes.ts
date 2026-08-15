@@ -16,11 +16,6 @@ router.post(
     paymentsController.initializePayment
 );
 
-router.post(
-    "/webhook",
-    express.raw({ type: "application/json" }),
-    paymentsController.webhook
-);
 
 router.get(
     "/mine",

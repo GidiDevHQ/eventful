@@ -7,12 +7,19 @@ import authRoutes from "./modules/auth/authRoutes";
 import eventsRoutes from "./modules/events/eventsRoutes"
 import ticketsRoutes from "./modules/tickets/ticketsRoutes"
 import paymentRoutes from "./modules/payments/paymentsRoutes"
+import * as paymentsController from "./modules/payments/paymentsController"
 
 export const app = express();
 
 app.use(helmet());
 
 app.use(cors())
+
+app.post(
+  "/api/v1/payments/webhook",
+  express.raw({ type: "application/json" }),
+  paymentsController.webhook
+);
 
 app.use(express.json());
 
