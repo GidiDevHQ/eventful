@@ -22,10 +22,10 @@ A full-stack ticketing platform API built for AltSchool Africa's 3rd semester ex
 | Requirement | Implementation |
 |---|---|
 | Authentication & Authorization | JWT-based auth, role-based access control (`CREATOR` / `EVENTEE`) |
-| QR Code Generation | Generated automatically once ticket payment is confirmed |
+| QR Code Generation | Generated automatically once ticket payment is confirmed; verified via `POST /tickets/verify` (creator-only scan endpoint) |
 | Shareability | Pre-built social share links (WhatsApp, Twitter, Facebook, Telegram, LinkedIn) per event |
-| Notifications | BullMQ delayed jobs — creators set default reminder offsets, eventees can add their own |
-| Analytics | Creator-wide overview + per-event stats (tickets sold, scanned, revenue), cached |
+| Notifications | BullMQ delayed jobs — creators set default reminder offsets per event, eventees can add their own custom offsets on top |
+| Analytics | Creator-wide overview + per-event stats (tickets sold, scanned, revenue), cached and invalidated on write |
 | Payment | Paystack transaction initialize + signature-verified webhook |
 
 ## Prerequisites
@@ -70,13 +70,13 @@ sudo systemctl start redis-server
 
 ### 4. Configure environment variables
 
-Create your local environment file based on the project defaults already present in the repo:
+Copy the example file and fill in your own values — `.env` is gitignored and never committed:
 
 ```bash
-cp .env .env.local
+cp .env.example .env
 ```
 
-Then update the values for your local machine. Required variables include:
+Required variables:
 
 ```
 DATABASE_URL="postgresql://eventful_user:your_password_here@localhost:5432/eventful?schema=public"
@@ -93,7 +93,7 @@ npx prisma generate
 npx prisma migrate dev
 ```
 
-If you want to apply the existing schema to a fresh database, `npx prisma migrate deploy` is also valid.
+If applying the existing schema to a fresh database (e.g. CI, first-time setup), `npx prisma migrate deploy` is also valid and non-interactive.
 
 ### 6. Start the server
 
@@ -101,7 +101,7 @@ If you want to apply the existing schema to a fresh database, `npx prisma migrat
 npm run dev
 ```
 
-Server runs at `http://localhost:4000`. Confirm it's alive:
+This boots the Express API **and** the BullMQ reminder worker in the same process (the worker is imported as a side effect in `server.ts`). Server runs at `http://localhost:4000`. Confirm it's alive:
 
 ```bash
 curl http://localhost:4000/health
@@ -119,13 +119,7 @@ Every endpoint can be tested directly from this page — click **Authorize**, pa
 
 ## Testing Webhooks Locally
 
-Paystack webhooks require a publicly reachable URL. For local development, make sure the app is running first:
-
-```bash
-npm run dev
-```
-
-Then expose it:
+Paystack webhooks require a publicly reachable URL. With the app running (`npm run dev`), expose it via ngrok:
 
 ```bash
 ngrok http 4000
@@ -135,7 +129,7 @@ Set the forwarded URL (`https://<subdomain>.ngrok-free.app/api/v1/payments/webho
 
 ## Running Tests
 
-Tests run against a **separate** test database, isolated from your dev data.
+Tests run against a **separate** test database, isolated from dev data.
 
 ### One-time test DB setup
 
@@ -148,7 +142,7 @@ CREATE DATABASE eventful_test OWNER eventful_user;
 \q
 ```
 
-The repo already includes `.env.test`; update it so it points to your local test database, then apply migrations:
+Copy `.env.example` to `.env.test` and point `DATABASE_URL` at `eventful_test`, then apply migrations:
 
 ```bash
 DATABASE_URL="postgresql://eventful_user:your_password_here@localhost:5432/eventful_test?schema=public" npx prisma migrate deploy
@@ -168,24 +162,21 @@ Includes unit tests (slug generation, JWT signing/verification) and integration 
 src/
 ├── app.ts                 # Express app bootstrap
 ├── config/                # env, Prisma client, Redis client
-├── middleware/            # auth, rate limiting, validation, error handling
+├── middleware/             # auth, rate limiting, validation, error handling
 ├── modules/
-│   ├── auth/              # signup, login, refresh
-│   ├── events/            # CRUD, listings, share links
-│   ├── tickets/           # apply/buy, QR verification
-│   ├── payments/          # Paystack integration
-│   ├── reminders/         # reminder logic
-│   └── analytics/         # creator stats
-├── jobs/                  # BullMQ queue + worker logic
-├── utils/                 # cache, JWT, slugify, QR generation
-├── docs/                  # Swagger config
-├── server.ts              # server bootstrap
-└── generated/             # Prisma-generated client output
+│   ├── auth/               # signup, login, refresh
+│   ├── events/              # CRUD, listings, share links
+│   ├── tickets/              # apply/buy, QR verification
+│   ├── payments/              # Paystack integration
+│   ├── reminders/              # BullMQ-backed reminder scheduling
+│   └── analytics/               # creator stats
+├── jobs/                     # BullMQ queue + worker
+├── utils/                     # cache, JWT, slugify, QR generation
+├── docs/                      # Swagger config
+└── server.ts                  # server + worker bootstrap
 prisma/
-├── schema.prisma          # data models
-├── migrations/            # generated migration files
-└── migration_lock.toml
-
+├── schema.prisma           # data models
+└── migrations/              # generated migration files
 tests/
 ├── unit/
 └── integration/
@@ -202,9 +193,3 @@ tests/
 ## Author
 
 Bamigbose Gideon — AltSchool Africa, Software Engineering
-
-## Notes
-
-- PostgreSQL and Redis must be running before local development or test execution.
-- The repo includes `.env` and `.env.test`; use them as your local environment baseline rather than a missing `.env.example` file.
-- The app expects the `eventful_user` database role and matching test database to exist on your local PostgreSQL instance.
