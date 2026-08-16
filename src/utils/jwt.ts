@@ -18,6 +18,7 @@ const CONFIG = {
     }
 } as const;
 
+// Generate short-lived access tokens used for authenticated API requests.
 export function signAccessToken(payload: AccessTokenPayload): string {
     const options: SignOptions = {};
     if (CONFIG.access.expiresIn !== undefined) {
@@ -26,6 +27,7 @@ export function signAccessToken(payload: AccessTokenPayload): string {
     return jwt.sign(payload, CONFIG.access.secret, options);
 }
 
+// Create longer-lived refresh tokens so a user can obtain a new access token without re-entering credentials.
 export function signRefreshToken(payload: AccessTokenPayload): string {
     const options: SignOptions = {};
     if (CONFIG.refresh.expiresIn !== undefined) {
@@ -34,11 +36,12 @@ export function signRefreshToken(payload: AccessTokenPayload): string {
     return jwt.sign(payload, CONFIG.refresh.secret, options);
 }
 
+// Validate access tokens on protected routes and return the embedded user identity.
 export function verifyAccessToken(token: string): AccessTokenPayload {
     return jwt.verify(token, CONFIG.access.secret) as AccessTokenPayload;
 }
 
-// Fixed: Now using CONFIG.refresh.secret instead of access secret
+// Validate refresh tokens with the refresh secret so rotating or renewing sessions stays isolated from access tokens.
 export function verifyRefreshToken(token: string): AccessTokenPayload {
     return jwt.verify(token, CONFIG.refresh.secret) as AccessTokenPayload;
 }

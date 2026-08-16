@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 
+// Build a URL-safe slug from a title while adding a short random suffix to avoid collisions.
 export function slugify(title: string) {
     const base = title
         .toLocaleLowerCase()

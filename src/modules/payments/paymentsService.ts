@@ -6,6 +6,7 @@ import { initializeTransaction, verifyTransaction } from "./paystackClient";
 import { confirmTicketPayment } from "../tickets/ticketsService";
 import { prisma } from "@/config/prisma";
 
+// Create a Paystack payment session for a pending ticket and return the checkout URL the frontend should redirect to.
 export async function initializePayment(userId: string, ticketId: string) {
     const ticket = await prisma.ticket.findUnique({
         where: { id: ticketId },
@@ -43,6 +44,7 @@ export async function initializePayment(userId: string, ticketId: string) {
     };
 }
 
+// Verify the Paystack webhook signature, confirm the transaction, and mark the related ticket as paid.
 export async function handlePaystackWebhook(rawBody: Buffer, signature: string) {
     const hash = crypto
     .createHmac("sha512", env.paystackSecretKey)
@@ -78,6 +80,7 @@ export async function handlePaystackWebhook(rawBody: Buffer, signature: string) 
     return { received: true };
 }
 
+// Return all payment records for a creator’s events, including the associated ticket and user information.
 export async function listPaymentForCreator(creatorId: string) {
     return prisma.payment.findMany({
         where: { ticket: { event: { creatorId } } },

@@ -12,6 +12,7 @@ declare global {
     }
 }
 
+// Enforce JWT-based access for protected routes and attach the authenticated user payload to the request.
 export function requireAuth(req: Request, _res: Response, next: NextFunction){
     const header = req.headers.authorization;
 
@@ -37,6 +38,7 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction){
     }
 }
 
+// Restrict a route to one or more allowed user roles, such as CREATOR or EVENTEE.
 export function requireRole(...roles: Role[]) {
     return (req: Request, _res: Response, next: NextFunction) => {
         if (!req.user) {

@@ -6,6 +6,7 @@ import *as authController from "./authController";
 
 const router = Router();
 
+// Authentication routes handle sign-up, sign-in, and token refresh for both creators and event attendees.
 /**
  * @openapi
  * /api/v1/auth/signup:
@@ -18,6 +19,6 @@ router.post("/signup", authLimiter, validate(signupSchema), authController.signu
 
 router.post("/login", authLimiter, validate(loginSchema), authController.login);
 
-router.post("/refresh", authLimiter, validate(refreshSchema), authController.refresh)
+router.post("/refresh", authLimiter, validate(refreshSchema), authController.refresh);
 
 export default router;

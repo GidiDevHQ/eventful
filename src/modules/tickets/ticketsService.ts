@@ -4,6 +4,7 @@ import { generateTicketToken, generateQrCodeDataUrl } from "@/utils/qrcode";
 import { invalidateByPrefix } from "@/utils/cache";
 import { scheduleRemindersForTicket } from "@/modules/reminders/remindersService";
 
+// Reserve a ticket for a user after checking event validity, capacity, and duplicate purchase rules.
 export async function applyForEvent(userId: string, eventId: string) {
     const event = await prisma.event.findUnique({ where: { id: eventId } });
     if (!event) throw new AppError("Event not found", 404);
@@ -46,6 +47,7 @@ export async function applyForEvent(userId: string, eventId: string) {
     return ticket;
 }
 
+// Mark a ticket as paid, generate a fresh QR code, and schedule follow-up reminders for the event.
 export async function confirmTicketPayment(ticketId: string) {
     const token = generateTicketToken();
     const qrCodeUrl = await generateQrCodeDataUrl(token);
@@ -66,6 +68,7 @@ export async function confirmTicketPayment(ticketId: string) {
     return ticket;
 }
 
+// Validate a QR ticket, ensure it belongs to the scanning creator, and mark it as used once.
 export async function verifyAndScanTicket(scannerId: string, qrCodeToken: string) {
     const ticket = await prisma.ticket.findUnique({
         where: { qrCodeToken },
@@ -95,6 +98,7 @@ export async function verifyAndScanTicket(scannerId: string, qrCodeToken: string
     return { ...updated, event: ticket.event, user: ticket.user };
 }
 
+// Fetch a user's ticket history including the linked event and payment record for the dashboard.
 export async function listMyTickets(userId: string) {
     return prisma.ticket.findMany({
         where: { userId },

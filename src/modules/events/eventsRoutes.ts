@@ -9,8 +9,9 @@ import {
 } from "./eventsSchema";
 import * as eventsController from "./eventsController";
 
-const router = Router()
+const router = Router();
 
+// Event routes are split between public reads and creator-only writes, matching the product rules.
 /**
  * @openapi
  * /api/v1/events:

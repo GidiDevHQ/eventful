@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { AppError } from "../utils/AppError";
 import { env } from "../config/env";
 
+// Turn unknown routes into a consistent 404 response instead of letting Express fall through silently.
 export function notFoundHandler(req: Request, _res: Response, next: NextFunction) {
   next(new AppError(`Route not found: ${req.method} ${req.originalUrl}`, 404));
 }
@@ -14,6 +15,7 @@ type ErrorWithMeta = Error & {
     stack?: string;
 }
 
+// Centralize API error formatting so validation, auth, Prisma, and app exceptions all return a predictable payload.
 export function globalErrorHandler(
   err: ErrorWithMeta,
   _req: Request,

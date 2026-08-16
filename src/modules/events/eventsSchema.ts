@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// Creation and update payloads validate event metadata before storing the record or changing ownership-sensitive fields.
 export const createEventSchema = z
   .object({
     body: z.object({
