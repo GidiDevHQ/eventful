@@ -8,7 +8,9 @@ import eventsRoutes from "./modules/events/eventsRoutes";
 import ticketsRoutes from "./modules/tickets/ticketsRoutes";
 import paymentRoutes from "./modules/payments/paymentsRoutes";
 import * as paymentsController from "./modules/payments/paymentsController";
-import analyticsRoutes from "./modules/analytics/analyticsRoutes"
+import analyticsRoutes from "./modules/analytics/analyticsRoutes";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./docs/swagger";
 
 export const app = express();
 
@@ -30,11 +32,12 @@ app.get("/health", (_req, res) => {
     res.status(200).json({ status: "ok" });
 });
 
-app.use("/api/v1/auth", authRoutes)
-app.use("/api/v1/events", eventsRoutes)
-app.use("/api/v1/tickets", ticketsRoutes)
-app.use("/api/v1/payments", paymentRoutes)
-app.use("/api/v1/analytics", analyticsRoutes)
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/events", eventsRoutes);
+app.use("/api/v1/tickets", ticketsRoutes);
+app.use("/api/v1/payments", paymentRoutes);
+app.use("/api/v1/analytics", analyticsRoutes);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(notFoundHandler);
 app.use(globalErrorHandler);

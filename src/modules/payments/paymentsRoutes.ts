@@ -8,6 +8,15 @@ import * as paymentsController from "./paymentsController";
 
 const router = Router();
 
+/**
+ * @openapi
+ * /api/v1/payments/initialize:
+ *   post:
+ *     tags: [Payments]
+ *     summary: Initialize a Paystack transaction for a pending ticket (eventee only)
+ *     security:
+ *       - bearerAuth: []
+ */
 router.post(
     "/initialize",
     requireAuth,
@@ -16,7 +25,15 @@ router.post(
     paymentsController.initializePayment
 );
 
-
+/**
+ * @openapi
+ * /api/v1/payments/mine:
+ *   get:
+ *     tags: [Payments]
+ *     summary: List all payments across events owned by the logged-in creator
+ *     security:
+ *       - bearerAuth: []
+ */
 router.get(
     "/mine",
     requireAuth,
