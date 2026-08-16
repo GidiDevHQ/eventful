@@ -20,13 +20,14 @@ const envSchema = z.object({
     FRONTEND_BASE_URL: z.url().default("http://localhost:5173")
 });
 
+// Fail fast during startup so missing configuration is caught before any DB or auth logic runs.
 const parsedEnv = envSchema.safeParse(process.env);
 
 if (!parsedEnv.success) {
     console.error("Invalid environment variables:");
 
-    console.error(JSON.stringify(parsedEnv.error.format), null, 2)
-    process.exit(1)
+    console.error(JSON.stringify(parsedEnv.error.format), null, 2);
+    process.exit(1);
 }
 
 export const env = {

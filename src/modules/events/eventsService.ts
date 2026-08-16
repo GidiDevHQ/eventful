@@ -9,6 +9,7 @@ import { promise } from "zod";
 const EVENT_LIST_TTL = 60;
 const EVENT_DETAIL_TTL = 120;
 
+// Prisma rejects undefined values for many fields, so strip them before creating/updating records.
 function stripUndefined<T extends Record<string, unknown>>(value: T): Partial<T> {
     return Object.fromEntries(
         Object.entries(value).filter(([, item]) => item !== undefined)
@@ -18,6 +19,7 @@ function stripUndefined<T extends Record<string, unknown>>(value: T): Partial<T>
 export async function createEvent(creatorId: string, input: CreateEventInput) {
     const { capacity, ...rest } = input;
 
+    // Prisma's model field is named Capacity, while the API payload uses capacity.
     const data = stripUndefined({
         ...rest,
         slug: slugify(input.title),
@@ -117,8 +119,9 @@ export async function listApplicants(creatorId: string, eventId: string) {
 }
 
 export function buildShareLinks(eventSlug: string, title: string) {
+    // Share links are built centrally so the app can reuse the same public event URL across channels.
     const url = `${env.frontendBaseUrl}/events/${eventSlug}`;
-    const text = encodeURIComponent(`Check out "${title}" on Eventful`)
+    const text = encodeURIComponent(`Check out "${title}" on Eventful`);
     const encodedUrl = encodeURIComponent(url);
 
     return {

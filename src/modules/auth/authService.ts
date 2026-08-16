@@ -6,8 +6,9 @@ import { LoginInput, SignupInput } from "./authSchema";
 
 const SALT_ROUND = 12;
 
+// Centralize token creation so signup/login/refresh all return the same payload shape.
 function buildTokens(user: { id: string; role: "CREATOR" | "EVENTEE" }) {
-    const payload = { sub: user.id, role: user.role }
+    const payload = { sub: user.id, role: user.role };
 
     return {
         accessToken: signAccessToken(payload),
@@ -17,10 +18,13 @@ function buildTokens(user: { id: string; role: "CREATOR" | "EVENTEE" }) {
 }
 
 export async function signup(input: SignupInput) {
+    // Prevent duplicate accounts before creating a new user record.
     const existing = await prisma.user.findUnique({ where: { email: input.email } });
     if (existing) {
         throw new AppError("An account with this email already exists", 409);
     }
+
+    // Hash the password before persistence to keep user credentials out of the database in plain text.
     const hashed = await bcrypt.hash(input.password, SALT_ROUND);
 
     const user = await prisma.user.create({
@@ -30,6 +34,7 @@ export async function signup(input: SignupInput) {
             password: hashed,
             role: input.role,
         },
+        // Only return the safe public fields; the password hash should never be exposed to clients.
         select: { id: true, name: true, email: true, role: true },
     });
 

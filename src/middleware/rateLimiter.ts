@@ -1,8 +1,13 @@
 import rateLimit from "express-rate-limit";
 import { RedisStore, type RedisReply } from "rate-limit-redis";
+import { env } from "../config/env";
 import { redis } from "../config/redis";
 
 export function makeRateLimiter(opt: { windowMs: number; max: number; message: string; prefix: string }) {
+    if (env.nodeEnv === "test") {
+        return (_req: any, _res: any, next: any) => next();
+    }
+
     return rateLimit({
         windowMs: opt.windowMs,
 

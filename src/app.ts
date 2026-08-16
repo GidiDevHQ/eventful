@@ -14,10 +14,11 @@ import { swaggerSpec } from "./docs/swagger";
 
 export const app = express();
 
+// Apply security headers and CORS before any route logic so every request is protected consistently.
 app.use(helmet());
+app.use(cors());
 
-app.use(cors())
-
+// The Paystack webhook payload must be read as raw JSON because the signature is verified against the raw body.
 app.post(
   "/api/v1/payments/webhook",
   express.raw({ type: "application/json" }),
@@ -26,6 +27,7 @@ app.post(
 
 app.use(express.json());
 
+// Global request throttling protects auth and payment routes without hiding real validation errors in tests.
 app.use(generateLimiter);
 
 app.get("/health", (_req, res) => {

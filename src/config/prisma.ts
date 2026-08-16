@@ -10,6 +10,7 @@ declare global {
     var __prisma: PrismaClient | undefined;
 }
 
+// Keep a single Prisma client in development to avoid reconnect churn during hot reloads.
 export const prisma =
     global.__prisma ??
     new PrismaClient({
