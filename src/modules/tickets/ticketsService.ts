@@ -90,6 +90,7 @@ export async function verifyAndScanTicket(scannerId: string, qrCodeToken: string
         where: { id: ticket.id },
         data: { status: "USED", scannedAt: new Date() },
     });
+    await invalidateByPrefix(`analytics:event:${ticket.eventId}`)
 
     return { ...updated, event: ticket.event, user: ticket.user };
 }
