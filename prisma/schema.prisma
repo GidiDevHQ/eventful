@@ -124,7 +124,7 @@ model Payment {
 }
 
 model Reminder {
-  id String
+  id String @id @default(uuid())
 
   userId  String
   user    User   @relation(fields: [userId], references: [id])
@@ -136,6 +136,7 @@ model Reminder {
   bullJobId String?
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, eventId, offsetMinutes])
   @@index([eventId])

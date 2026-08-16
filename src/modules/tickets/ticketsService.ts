@@ -2,6 +2,7 @@ import { prisma } from "@/config/prisma";
 import { AppError } from "@/utils/AppError";
 import { generateTicketToken, generateQrCodeDataUrl } from "@/utils/qrcode";
 import { invalidateByPrefix } from "@/utils/cache";
+import { scheduleRemindersForTicket } from "@/modules/reminders/remindersService";
 
 export async function applyForEvent(userId: string, eventId: string) {
     const event = await prisma.event.findUnique({ where: { id: eventId } });
@@ -57,6 +58,8 @@ export async function confirmTicketPayment(ticketId: string) {
             qrCodeUrl,
         },
     });
+
+    await scheduleRemindersForTicket(ticket.userId, ticket.eventId)
 
     await invalidateByPrefix(`analytics:event:${ticket.eventId}`);
 

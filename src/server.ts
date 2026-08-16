@@ -2,6 +2,7 @@ import { app } from "./app";
 import { env } from "./config/env";
 import { prisma } from "./config/prisma";
 import { redis } from "./config/redis";
+import "./jobs/reminderWorker"
 
 async function main() {
     await prisma.$connect();
