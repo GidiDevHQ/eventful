@@ -13,6 +13,12 @@ export const createEventSchema = z
         .string({ error: "Event description is required" })
         .min(10, "Description must be at least 10 characters long"),
 
+      category: z
+        .string({ error: "Event category is required" })
+        .min(2, "Category must be at least 2 characters long")
+        .max(100, "Category cannot exceed 100 characters")
+        .optional(),
+
       venue: z
         .string({ error: "Venue location is required" })
         .min(2, "Venue must be at least 2 characters long"),
@@ -53,6 +59,7 @@ const rawUpdateBodySchema = z.object({
   coverImageUrl: z.string().url("Cover image must be a valid URL string").optional(),
   price: z.number().int("Price must be a whole number in Kobo/Cents").nonnegative("Ticket price cannot be negative").optional(),
   capacity: z.number().int("Capacity must be a whole integer number").positive("Event capacity must be at least 1 person").optional(),
+  category: z.string().min(2, "Category must be at least 2 characters long").max(100, "Category cannot exceed 100 characters").optional(),
   startsAt: z.string().datetime({ message: "Invalid start date format. Expected an ISO-8601 string" }).optional(),
   endsAt: z.string().datetime({ message: "Invalid end date format. Expected an ISO-8601 string" }).optional(),
   defaultReminderOffsets: z.array(z.number().int().positive()).optional(),

@@ -76,7 +76,7 @@ export async function listUpcomingEvents(page = 1, pageSize = 20) {
                 take: pageSize,
                 include: { creator: { select: { id: true, name: true } } },
             }),
-            prisma.event.count({ where: { startsAt: new Date() } }),
+            prisma.event.count({ where: { startsAt: { gte: new Date() } } }),
         ]);
         return { events, total, page, pageSize }
     })

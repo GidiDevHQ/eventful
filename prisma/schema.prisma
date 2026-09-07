@@ -53,6 +53,7 @@ model Event {
 
   title         String
   description   String
+  category      String
   venue         String
   coverImageUrl String?
 
